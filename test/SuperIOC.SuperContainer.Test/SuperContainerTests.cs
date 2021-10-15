@@ -7,7 +7,7 @@ namespace SuperIOC.SuperContainer.Test
     public class SuperContainerTests
     {
         [Fact]
-        public void GetTransient_ShouldNotReturnNull()
+        public void Get_Transient_ShouldNotReturnNull()
         {
             //arrange
             var container = new SuperContainer();
@@ -21,7 +21,7 @@ namespace SuperIOC.SuperContainer.Test
         }
 
         [Fact]
-        public void Get_WhenLifeTimeIsSingleton_ShouldReturnSameObject()
+        public void Get_Singleton_ShouldReturnSameObject()
         {
             //arrange
             var container = new SuperContainer();
@@ -39,7 +39,26 @@ namespace SuperIOC.SuperContainer.Test
         }
 
         [Fact]
-        public void Get_WhenLifeTimeIsTransient_ShouldNotReturnSameObject()
+        public void Get_NestedSingleton_ShouldReturnSameObject()
+        {
+            //arrange
+            var container = new SuperContainer();
+            container.RegisterSingleton<BatmanController, BatmanController>();
+            container.RegisterSingleton<IBatmanService, BatmanService>();
+            
+            //act
+            var instance1 = container.Get<BatmanController>();
+            var instance2 = container.Get<BatmanController>();
+            
+            //assert
+            var hashcode1 = instance1.GetHashCode();
+            var hashcode2 = instance2.GetHashCode();
+
+            hashcode1.Should().Be(hashcode2);
+        }
+
+        [Fact]
+        public void Get_Transient_ShouldReturnNewObject()
         {
             //arrange
             var container = new SuperContainer();
@@ -54,6 +73,25 @@ namespace SuperIOC.SuperContainer.Test
             var hashcode2 = instance2.GetHashCode();
 
             hashcode1.Should().NotBe(hashcode2);
+        }
+        
+        [Fact]
+        public void Get_NestedTransient_ShouldReturnNewObject()
+        {
+            //arrange
+            var container = new SuperContainer();
+            container.RegisterTransient<BatmanController, BatmanController>(); ;
+            container.RegisterTransient<IBatmanService, BatmanService>();
+            
+            //act
+            var instance1 = container.Get<BatmanController>();
+            var instance2 = container.Get<BatmanController>();
+            
+            //assert
+            var hashcode1 = instance1.GetHashCode();
+            var hashcode2 = instance2.GetHashCode();
+
+            hashcode1.Should().Be(hashcode2);
         }
 
         [Fact]
@@ -82,5 +120,6 @@ namespace SuperIOC.SuperContainer.Test
                 .Should()
                 .ThrowExactly<SuperContainerException>();
         }
+        
     }
 }

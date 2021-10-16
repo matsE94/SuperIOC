@@ -6,6 +6,7 @@ namespace SuperIOC.SuperContainer
     {
         public static void RegisterTransient<T>
             (this ISuperContainer superContainer, Func<IDependencyProvider,object> creator)
+            where T : class
             => superContainer.RegisterTransient<T, T>(creator);
 
         public static void RegisterTransient<TAbstraction, TImplementation>
@@ -17,6 +18,7 @@ namespace SuperIOC.SuperContainer
             });
 
         public static void RegisterTransient<T>(this ISuperContainer superContainer)
+            where T : class
             => superContainer.RegisterTransient<T, T>();
 
         public static void RegisterTransient<TAbstraction, TImplementation>(this ISuperContainer superContainer)
@@ -27,6 +29,7 @@ namespace SuperIOC.SuperContainer
             });
 
         public static void RegisterSingleton<T>(this ISuperContainer superContainer)
+            where T : class
             => superContainer.RegisterSingleton<T, T>();
 
         public static void RegisterSingleton<TAbstraction, TImplementation>(this ISuperContainer superContainer)
@@ -35,13 +38,5 @@ namespace SuperIOC.SuperContainer
             {
                 LifeTime = LifeTime.Singleton
             });
-
-        public static T GetOrThrow<T>(this IDependencyProvider superContainer)
-            where T : class
-        {
-            var instance = superContainer.Get<T>();
-            if (instance is null) throw ThrowHelper.ActivationError(typeof(T));
-            return instance;
-        }
     }
 }

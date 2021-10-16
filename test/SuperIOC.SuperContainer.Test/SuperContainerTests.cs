@@ -189,19 +189,6 @@ namespace SuperIOC.SuperContainer.Test
         }
 
         [Fact]
-        public void GetOrThrow_WithNoRegistrations_ShouldThrowExactly()
-        {
-            //arrange
-            var container = new SuperContainer();
-            var provider = container.BuildProvider();
-
-            //act+assert
-            provider.Invoking(x => x.GetOrThrow<BatmanService>())
-                .Should()
-                .ThrowExactly<SuperContainerException>();
-        }
-
-        [Fact]
         public void Custom_creator()
         {
             //arrange
@@ -217,7 +204,11 @@ namespace SuperIOC.SuperContainer.Test
                     return new BatmanController(service);
                 });
 
-            provider.Get<BatmanController>();
+            //act
+            var result = provider.Get<BatmanController>();
+
+            //assert
+            result.Should().NotBeNull();
         }
     }
 }

@@ -2,27 +2,27 @@ using System;
 
 namespace SuperIOC.SuperContainer
 {
-    public static class ThrowHelper
+    internal static class ThrowHelper
     {
-        public static SuperContainerException ActivationError(Dependency dependency)
+        internal static SuperContainerException ActivationError(Dependency dependency)
         {
             var msg = $"Failed to activate {dependency.ImplType} as {dependency.AbstractType}";
             return new SuperContainerException(msg);
         }
 
-        public static SuperContainerException ActivationError(Type type)
+        internal static SuperContainerException ActivationError(Type type)
         {
             var msg = $"Failed to activate {type}";
             return new SuperContainerException(msg);
         }
 
-        public static SuperContainerException MultipleCtorsError(Type type)
+        internal static SuperContainerException MultipleCtorsError(Type type)
         {
             var msg = $"Multiple constructors are NOT supported. Type {type} has more than one ctors.";
             return new SuperContainerException(msg);
         }
 
-        public static Exception NotRegisteredError(Type type)
+        internal static Exception NotRegisteredError(Type type)
         {
             var msg = $"Cannot activate because ctor param {type} is not registered";
             return new SuperContainerException(msg);

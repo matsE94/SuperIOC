@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace SuperIOC.SuperContainer
 {
-    public static class TypeExtensions
+    internal static class TypeExtensions
     {
-        public static bool HasEmptyConstructor(this Type type)
+        internal static bool HasEmptyConstructor(this Type type)
         {
             var constructors = type.GetConstructors();
             if (constructors.Length > 1)

@@ -10,8 +10,7 @@ namespace SuperIOC.SuperContainer
             ImplType = implType;
         }
 
-
-        public Dependency(Type abstractType, Type implType, Func<IDependencyProvider, object>? customCreator)
+        public Dependency(Type abstractType, Type implType, Func<IDependencyProvider, object> customCreator)
         {
             AbstractType = abstractType;
             ImplType = implType;
@@ -22,7 +21,7 @@ namespace SuperIOC.SuperContainer
         public Type ImplType { get; set; }
         public Func<IDependencyProvider, object>? CustomCreator { get; set; } = null;
         public LifeTime LifeTime { get; set; } = LifeTime.Transient;
-        private object? Instance { get; set; } = null;
+        public object? Instance { get; set; } = null;
 
         public object GetOrCreate(IDependencyProvider provider) => GetOrCreate(new object[] { },provider);
 

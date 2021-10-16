@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 
 namespace SuperIOC.SuperContainer
@@ -7,17 +8,23 @@ namespace SuperIOC.SuperContainer
     public interface ISuperContainer
     {
         void Register(Dependency dependency);
+        IDependencyProvider BuildProvider();
+    }
+
+    public interface IDependencyProvider
+    {
         T Get<T>() where T : class;
     }
 
-    public class SuperContainer : ISuperContainer
+    public class DependencyProvider : IDependencyProvider
     {
-        private readonly Dictionary<Type, Dependency> _registrations = new();
+        private readonly Dictionary<Type,Dependency> _registrations;
 
-        public void Register(Dependency dependency)
+        public DependencyProvider(Dictionary<Type, Dependency> registrations)
         {
-            _registrations[dependency.AbstractType] = dependency;
+            _registrations = registrations;
         }
+
 
         public T Get<T>() where T : class
         {
@@ -26,7 +33,7 @@ namespace SuperIOC.SuperContainer
 
             var dependency = _registrations[abstractType];
 
-            if (dependency.ImplType.HasEmptyConstructor()) return (T)dependency.GetOrCreate();
+            if (dependency.ImplType.HasEmptyConstructor()) return (T)dependency.GetOrCreate(this);
             return (T)ResolveObject(abstractType);
         }
 
@@ -47,17 +54,32 @@ namespace SuperIOC.SuperContainer
 
                 var registration = _registrations[type];
                 activatedParams[i] = registration.ImplType.HasEmptyConstructor()
-                    ? registration.GetOrCreate()
+                    ? registration.GetOrCreate(this)
                     : ResolveObject(type);
             }
 
-            return rootRegistration.GetOrCreate(activatedParams);
+            return rootRegistration.GetOrCreate(activatedParams, this);
         }
 
         internal void EnsureRegistered(Type abstractType)
         {
             var isRegistered = _registrations.ContainsKey(abstractType);
             if (!isRegistered) throw ThrowHelper.NotRegisteredError(abstractType);
+        }
+    }
+
+    public class SuperContainer : ISuperContainer
+    {
+        private readonly Dictionary<Type, Dependency> _registrations = new();
+
+        public void Register(Dependency dependency)
+        {
+            _registrations[dependency.AbstractType] = dependency;
+        }
+
+        public IDependencyProvider BuildProvider()
+        {
+            return new DependencyProvider(_registrations);
         }
     }
 }

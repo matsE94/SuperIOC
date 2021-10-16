@@ -12,9 +12,9 @@ namespace SuperIOC.SuperContainer.Test
             //arrange
             var container = new SuperContainer();
             container.RegisterTransient<IBatmanService, BatmanService>();
-
+            var provider = container.BuildProvider();
             //act
-            var guidCreator = container.Get<IBatmanService>();
+            var guidCreator = provider.Get<IBatmanService>();
 
             //assert
             guidCreator.Should().NotBeNull();
@@ -26,10 +26,10 @@ namespace SuperIOC.SuperContainer.Test
             //arrange
             var container = new SuperContainer();
             container.RegisterSingleton<IBatmanService, BatmanService>();
-
+            var provider = container.BuildProvider();
             //act
-            var instance1 = container.Get<IBatmanService>();
-            var instance2 = container.Get<IBatmanService>();
+            var instance1 = provider.Get<IBatmanService>();
+            var instance2 = provider.Get<IBatmanService>();
 
             //assert
             var hashcode1 = instance1.GetHashCode();
@@ -45,10 +45,10 @@ namespace SuperIOC.SuperContainer.Test
             var container = new SuperContainer();
             container.RegisterSingleton<BatmanController, BatmanController>();
             container.RegisterSingleton<IBatmanService, BatmanService>();
-
+            var provider = container.BuildProvider();
             //act
-            var instance1 = container.Get<BatmanController>();
-            var instance2 = container.Get<BatmanController>();
+            var instance1 = provider.Get<BatmanController>();
+            var instance2 = provider.Get<BatmanController>();
 
             //assert
             var hashcode1 = instance1.GetHashCode();
@@ -63,10 +63,10 @@ namespace SuperIOC.SuperContainer.Test
             //arrange
             var container = new SuperContainer();
             container.RegisterTransient<IBatmanService, BatmanService>();
-
+            var provider = container.BuildProvider();
             //act
-            var instance1 = container.Get<IBatmanService>();
-            var instance2 = container.Get<IBatmanService>();
+            var instance1 = provider.Get<IBatmanService>();
+            var instance2 = provider.Get<IBatmanService>();
 
             //assert
             var hashcode1 = instance1.GetHashCode();
@@ -81,12 +81,13 @@ namespace SuperIOC.SuperContainer.Test
             //arrange
             var container = new SuperContainer();
             container.RegisterTransient<BatmanController, BatmanController>();
-            ;
             container.RegisterTransient<IBatmanService, BatmanService>();
+            var provider = container.BuildProvider();
+
 
             //act
-            var instance1 = container.Get<BatmanController>();
-            var instance2 = container.Get<BatmanController>();
+            var instance1 = provider.Get<BatmanController>();
+            var instance2 = provider.Get<BatmanController>();
 
             //assert
             var hashcode1 = instance1.GetHashCode();
@@ -102,9 +103,10 @@ namespace SuperIOC.SuperContainer.Test
             var container = new SuperContainer();
             container.RegisterTransient<IBatmanService, BatmanService>();
             container.RegisterSingleton<BatmanController, BatmanController>();
+            var provider = container.BuildProvider();
 
             //act
-            var controller = container.Get<BatmanController>();
+            var controller = provider.Get<BatmanController>();
 
             //assert
             controller.Should().NotBeNull(); // means we successfully activated nested dependencies
@@ -142,9 +144,9 @@ namespace SuperIOC.SuperContainer.Test
             container.RegisterTransient<A>();
             container.RegisterTransient<B>();
             container.RegisterSingleton<C>();
-
+            var provider = container.BuildProvider();
             //act
-            var result = container.Get<C>();
+            var result = provider.Get<C>();
 
             //assert
             result.Should().NotBeNull(); // means we successfully activated nested dependencies
@@ -178,9 +180,9 @@ namespace SuperIOC.SuperContainer.Test
             container.RegisterTransient<PersonController>();
             container.RegisterTransient<AutoMapper>();
             container.RegisterSingleton<Mediator>();
-
+            var provider = container.BuildProvider();
             //act
-            var result = container.Get<PersonController>();
+            var result = provider.Get<PersonController>();
 
             //assert
             result.Should().NotBeNull(); // means we successfully activated nested dependencies
@@ -191,11 +193,31 @@ namespace SuperIOC.SuperContainer.Test
         {
             //arrange
             var container = new SuperContainer();
+            var provider = container.BuildProvider();
 
-            //act
-            container.Invoking(x => x.GetOrThrow<BatmanService>())
+            //act+assert
+            provider.Invoking(x => x.GetOrThrow<BatmanService>())
                 .Should()
                 .ThrowExactly<SuperContainerException>();
+        }
+
+        [Fact]
+        public void Custom_creator()
+        {
+            //arrange
+            var container = new SuperContainer();
+            var provider = container.BuildProvider();
+
+            //act
+            container.RegisterTransient<IBatmanService,BatmanService>();
+            container.RegisterTransient<BatmanController>(
+                p =>
+                {
+                    var service = p.Get<IBatmanService>();
+                    return new BatmanController(service);
+                });
+
+            provider.Get<BatmanController>();
         }
     }
 }

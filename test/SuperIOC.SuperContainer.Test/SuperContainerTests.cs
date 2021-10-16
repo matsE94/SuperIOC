@@ -91,7 +91,7 @@ namespace SuperIOC.SuperContainer.Test
             var hashcode1 = instance1.GetHashCode();
             var hashcode2 = instance2.GetHashCode();
 
-            hashcode1.Should().Be(hashcode2);
+            hashcode1.Should().NotBe(hashcode2);
         }
 
         [Fact]

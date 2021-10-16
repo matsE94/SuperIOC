@@ -25,21 +25,21 @@ namespace SuperIOC.SuperContainer
             var isRegistered = _registrations.ContainsKey(abstractType);
             if (!isRegistered)
                 throw ThrowHelper.NotRegisteredError(abstractType);
-            
+
             var dependency = _registrations[abstractType];
 
-            if (!HasEmptyCtor(dependency.ImplType)) return (T)ResolveObject(abstractType, false);
+            if (!HasEmptyCtor(dependency.ImplType)) return (T) ResolveObject(abstractType, false);
 
-            return (T)ResolveObjectNoCtor(dependency);
+            return (T) dependency.GetOrCreate(new object[] { });
         }
 
         internal object ResolveObject(Type abstractType, bool? hasEmptyCtor = null)
         {
             var dependency = _registrations[abstractType];
 
-            if (hasEmptyCtor != null && (bool)hasEmptyCtor || HasEmptyCtor(dependency.ImplType))
+            if (hasEmptyCtor != null && (bool) hasEmptyCtor || HasEmptyCtor(dependency.ImplType))
             {
-                return ResolveObjectNoCtor(dependency);
+                return dependency.GetOrCreate(new object[] { });
             }
 
             var ctor = dependency.ImplType.GetConstructors().SingleOrDefault() ??
@@ -51,23 +51,20 @@ namespace SuperIOC.SuperContainer
             {
                 var paramType = param.ParameterType;
                 var isRegistered = _registrations.ContainsKey(paramType);
+                var paramDependency = _registrations[paramType];
                 if (!isRegistered)
                     throw ThrowHelper.NotRegisteredError(paramType);
+
+                if (HasEmptyCtor(paramDependency.ImplType))
+                {
+                    activatedParams[i++] = paramDependency.GetOrCreate(new object[] { });
+                    continue;
+                }
+
                 activatedParams[i++] = ResolveObject(paramType);
             }
 
-            return dependency.Creator(activatedParams);
-        }
-
-        private object ResolveObjectNoCtor(Dependency dependency)
-        {
-            if (dependency.LifeTime is LifeTime.Transient)
-            {
-                return dependency.Creator(new object[] { });
-            }
-
-            dependency.Instance ??= dependency.Creator(new object[] { });
-            return dependency.Instance;
+            return dependency.GetOrCreate(activatedParams);
         }
 
         private bool HasEmptyCtor(Type type)

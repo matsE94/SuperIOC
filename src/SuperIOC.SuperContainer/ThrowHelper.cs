@@ -16,9 +16,9 @@ namespace SuperIOC.SuperContainer
             return new SuperContainerException(msg);
         }
 
-        public static SuperContainerException MultipleCtorsError(Dependency dependency)
+        public static SuperContainerException MultipleCtorsError(Type type)
         {
-            var msg = $"Multiple constructors are NOT supported. Type {dependency.ImplType} has more than one ctors.";
+            var msg = $"Multiple constructors are NOT supported. Type {type} has more than one ctors.";
             return new SuperContainerException(msg);
         }
 

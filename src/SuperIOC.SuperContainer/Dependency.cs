@@ -8,13 +8,14 @@ namespace SuperIOC.SuperContainer
         {
             AbstractType = abstractType;
             ImplType = implType;
-            Creator = BuildDefaultCreator();
         }
 
         public Type AbstractType { get; set; }
         public Type ImplType { get; set; }
         public LifeTime LifeTime { get; set; } = LifeTime.Transient;
-        public object? Instance { get; set; } = null;
+        private object? Instance { get; set; } = null;
+
+        public object GetOrCreate() => GetOrCreate(new object[] { });
 
         public object GetOrCreate(object[] ctorParams)
         {
@@ -27,17 +28,11 @@ namespace SuperIOC.SuperContainer
             return Instance;
         }
 
-        // creator needs better default stuff
-        public Func<object[], object> Creator { get; init; }
-
-        private Func<object[], object> BuildDefaultCreator()
+        private object Creator(object[] ctorParameters)
         {
-            return ctorParameters =>
-            {
-                object? obj = Activator.CreateInstance(ImplType, ctorParameters);
-                if (obj is null) throw ThrowHelper.ActivationError(this);
-                return obj;
-            };
+            object? obj = Activator.CreateInstance(ImplType, ctorParameters);
+            if (obj is null) throw ThrowHelper.ActivationError(this);
+            return obj;
         }
     }
 }

@@ -27,5 +27,11 @@ namespace SuperIOC.SuperContainer
             var msg = $"Cannot activate because ctor param {type} is not registered";
             return new SuperContainerException(msg);
         }
+
+        internal static Exception AlreadyRegisteredError(Type type)
+        {
+            var msg = $"There is already a registration for the type {type}";
+            return new SuperContainerException(msg);
+        }
     }
 }

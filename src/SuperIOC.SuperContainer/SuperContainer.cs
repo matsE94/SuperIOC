@@ -15,7 +15,14 @@ namespace SuperIOC.SuperContainer
 
         public void Register(Dependency dependency)
         {
-            _registrations[dependency.AbstractType] = dependency;
+            var type = dependency.AbstractType;
+
+            if (_registrations.ContainsKey(type))
+            {
+                throw ThrowHelper.AlreadyRegisteredError(type);
+            }
+
+            _registrations[type] = dependency;
         }
 
         public IDependencyProvider BuildProvider()
